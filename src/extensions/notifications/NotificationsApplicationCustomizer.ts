@@ -7,7 +7,6 @@ import {
   PlaceholderContent,
   PlaceholderName
 } from '@microsoft/sp-application-base';
-import { InitLogger } from "../../common/LoggerBuilder";
 import { Dialog } from '@microsoft/sp-dialog';
 import Constants from "../../common/Constants";
 import { Settings } from '@e2/settings';
@@ -33,13 +32,11 @@ export default class NotificationsApplicationCustomizer
     constructor() {
         super();
         //load fabric ui styles & icons
-        
     }
 
     @override
     public onInit(): Promise<void> {
         Settings.init(this.context.pageContext);
-        InitLogger(this.context);
 
         if (!this._customizerPlaceholder) {
             this._customizerPlaceholder = this.context.placeholderProvider.tryCreateContent(PlaceholderName.Top, { 
