@@ -5,6 +5,10 @@ import { Settings } from '@e2/settings';
 import Constants from "../../../common/Constants";
 /* tslint:disable-next-line:no-use-before-declare */
 import styles from "./Notifications.module.scss";
+import GraphService from "../service/graphService";
+import TimsService from "../service/timsService";
+import DataHelper from "../util/dataHelper";
+import IconHelper from "../util/iconHelper";
 
 export interface INotificationsProperties {
     inlineStyles?: string;
@@ -15,6 +19,8 @@ export interface INotificationsProperties {
 export interface INotificationsState {
     settingsLoaded: boolean;
     notificationCount: number;
+    showContainer: boolean;
+    data: Object[];
 }
 
 export default class Notifications extends React.Component<INotificationsProperties, INotificationsState> {
@@ -23,17 +29,48 @@ export default class Notifications extends React.Component<INotificationsPropert
         const randomInteger = Math.floor(Math.random() * 11);
         this.state = {
             settingsLoaded: false,
-            notificationCount: randomInteger
+            notificationCount: randomInteger,
+            showContainer: false,
+            data: []
         };
     }
 
     private toggleNotificationsBox(): void {
-        console.log('toggleNotificationsBox() clicked');
+        this.setState({
+            ...this.state,
+            showContainer: !this.state.showContainer
+        });
     } 
 
+    public componentDidMount() {
+        // window.addEventListener('click', this.hideNotifications.bind(this));
+        this.initComponent();
+    }
+
+    private hideNotifications = () => {
+         this.setState({
+            ...this.state,
+            showContainer: false
+        });
+    }
 
     private initComponent() {
-        // let stateToUpdate = {...this.state};
+        console.log('initComponent()');
+        const graphService = new GraphService;
+        const timsService = new TimsService;
+        const dataHelper = new DataHelper; 
+        
+        const GraphDataCall = graphService.mockDataPromise();
+        const TimsDataCall = timsService.mockDataPromise();
+        Promise.all([GraphDataCall, TimsDataCall]).then(([GraphData, TimData]) => {
+            dataHelper.dataParser(GraphData, TimData).then((data) => {
+                console.log('2nd promise', data);
+                this.setState({
+                    ...this.state,
+                    data: data
+                });
+            });
+        });
         // Settings.Get([
         //     Constants.settings.apiURL
         // ]).then(settings => {
@@ -43,15 +80,34 @@ export default class Notifications extends React.Component<INotificationsPropert
     }
 
     public render(): React.ReactElement<INotificationsProperties> {
-        const { notificationCount } = this.state;
-        console.log('Notifications.tsx: render()');
+        const { notificationCount, showContainer, data } = this.state;
+        const iconHelper = new IconHelper;
         return (
             <div className={styles.main}>
                 <div 
-                    className={styles.container}
-                    onClick= { () => this.toggleNotificationsBox() }>
+                    className={styles.iconContainer}
+                    onClick= { () => this.toggleNotificationsBox() }
+                    style={{backgroundColor: showContainer && '#e12422'}}
+                    >
                         <i className="ms-Icon ms-Icon--Plug"></i>
                         <span className={styles.count}>{notificationCount}</span>
+                </div>
+                <div 
+                    className={styles.notificationsContainer}
+                    style={{display: !!showContainer ? 'block' : 'none'}}
+                >
+                    <div className={styles.header}>
+                        {`${notificationCount} notifications`}
+                    </div>
+                    <div className={styles.body}>
+                        { data.map((d) => 
+                            <div className={styles.notificationItem}>
+                                <span><i className={`ms-Icon ${iconHelper.convertTypetoIcon(d['type'])}`}></i></span>
+                                <span>{d['title']}</span>
+                                <span>{d['createdDate']}</span>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         );

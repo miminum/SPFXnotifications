@@ -3,7 +3,7 @@
     position: absolute;
     height: 115px;
 
-    .container{
+    .iconContainer{
         position: absolute;
         right: 374px;
         top: 38px;
@@ -11,6 +11,7 @@
         width: 40px;
         text-align: center;
         cursor: pointer;
+        z-index: 3;
         i {
             position: relative;
             top: 50%;
@@ -34,6 +35,33 @@
             border-radius: 50%;
             background-color: #e12422;
             color: #F4F4F4;
+        }
+    }
+    .notificationsContainer {
+        position: absolute;
+        right: 374px;
+        top: 38px;
+        width: 300px;
+        height: 200px;
+        border-top: none;
+        background-color: #fff;
+        z-index: 2;
+        .header {
+            height: 40px;
+            width: 160px;
+            background-color: #e12422;
+            text-align: center;
+            color: #fff;
+
+        }
+        .body{
+            .notificationItem{
+                border-bottom: 1px solid #333333;
+                height: 40px;
+                i {
+                    font-size: 20px;
+                }
+            }
         }
     }
 }
