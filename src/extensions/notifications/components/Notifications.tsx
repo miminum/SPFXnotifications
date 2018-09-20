@@ -10,10 +10,15 @@ import TimsService from "../service/timsService";
 import DataHelper from "../util/dataHelper";
 import IconHelper from "../util/iconHelper";
 
+import * as Moment from "moment";
+import { Context } from "@microsoft/teams-js";
+import { BaseComponentContext } from '@microsoft/sp-component-base';
+
 export interface INotificationsProperties {
     inlineStyles?: string;
     siteCollectionAbsoluteUrl: string;
     currentUserLogin: string;
+    context: BaseComponentContext;
 }
 
 export interface INotificationsState {
@@ -56,7 +61,7 @@ export default class Notifications extends React.Component<INotificationsPropert
 
     private initComponent() {
         console.log('initComponent()');
-        const graphService = new GraphService;
+        const graphService = new GraphService(this.props.context);
         const timsService = new TimsService;
         const dataHelper = new DataHelper; 
         
@@ -71,12 +76,21 @@ export default class Notifications extends React.Component<INotificationsPropert
                 });
             });
         });
+
+        graphService.getNotifications();
         // Settings.Get([
         //     Constants.settings.apiURL
         // ]).then(settings => {
         //     stateToUpdate.settingsLoaded = true;
         //     this.setState(stateToUpdate);
         // });
+    }
+
+    private getFormattedDate(value:string) {
+        console.log('getFormattedDate() value', value);
+        var date = Moment(value);
+        console.log('getFormattedDate() date', date);
+        return date.isValid() ? date.format('HH:MM, DD MMM YYYY') : '';
     }
 
     public render(): React.ReactElement<INotificationsProperties> {
@@ -96,7 +110,7 @@ export default class Notifications extends React.Component<INotificationsPropert
                     className={styles.notificationsContainer}
                     style={{display: !!showContainer ? 'block' : 'none'}}
                 >
-                    <div className={styles.header}>
+                    <div className={styles.header} onClick= { () => this.toggleNotificationsBox() }>
                         {`${notificationCount} notifications`}
                     </div>
                     <div className={styles.body}>
@@ -104,7 +118,7 @@ export default class Notifications extends React.Component<INotificationsPropert
                             <div className={styles.notificationItem}>
                                 <span><i className={`ms-Icon ${iconHelper.convertTypetoIcon(d['type'])}`}></i></span>
                                 <span>{d['title']}</span>
-                                <span>{d['createdDate']}</span>
+                                <span>{this.getFormattedDate(d['startDate'])}</span>
                             </div>
                         )}
                     </div>

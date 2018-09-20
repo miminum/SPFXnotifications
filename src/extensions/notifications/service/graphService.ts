@@ -1,6 +1,16 @@
 import { Settings } from '@e2/settings';
+import axios from "axios";
+import { MSGraphClient } from '@microsoft/sp-http';
+import { Context } from '@microsoft/teams-js';
+import { BaseComponentContext } from '@microsoft/sp-component-base';
 
 export default class GraphService {
+    private context: BaseComponentContext;
+
+    constructor(context:BaseComponentContext) {
+       this.context = context;
+    }   
+
     public mockDataPromise(): Promise<Array<{}>> {
         const MockData = [
             {
@@ -590,5 +600,21 @@ export default class GraphService {
             },
         ];
         return Promise.resolve(MockData);
+    }
+
+    public getNotifications() {
+        return this.context.msGraphClientFactory
+            .getClient()
+            .then((client: MSGraphClient): void => {
+                // get information about the current user from the Microsoft Graph
+                client
+                .api("me/events?$filter=startswith(subject, 't')")
+                .get((error, response: any, rawResponse?: any) => {
+                        console.log('getNotifications error', error);
+                        console.log('getNotifications response', response);
+                        console.log('getNotifications rawResponse', rawResponse);
+                    return Promise.resolve(null);
+            });
+        });
     }
 }

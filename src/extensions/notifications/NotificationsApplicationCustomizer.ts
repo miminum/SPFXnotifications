@@ -81,7 +81,8 @@ export default class NotificationsApplicationCustomizer
                 siteCollectionAbsoluteUrl: this.context.pageContext.site.absoluteUrl,
                 currentUserLogin: this.context.pageContext.user.loginName,
                 key: this._key,
-                inlineStyles: this.properties.inlineStyles
+                inlineStyles: this.properties.inlineStyles,
+                context: this.context
             } as INotificationsProperties);
             ReactDOM.render(header, domElement);
         }
