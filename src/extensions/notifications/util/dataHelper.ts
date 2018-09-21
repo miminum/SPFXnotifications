@@ -1,4 +1,4 @@
-import TaskItem from "../model/Task";
+import TaskItem from "../model/TaskItem";
 
 export default class DataHelper {
     

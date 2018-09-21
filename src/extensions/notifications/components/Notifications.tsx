@@ -6,6 +6,7 @@ import Constants from "../../../common/Constants";
 /* tslint:disable-next-line:no-use-before-declare */
 import { Panel, PanelType } from 'office-ui-fabric-react/lib/Panel';
 import styles from "./Notifications.module.scss";
+import Task from "./Task";
 import GraphService from "../service/graphService";
 import TimsService from "../service/timsService";
 import DataHelper from "../util/dataHelper";
@@ -128,11 +129,12 @@ export default class Notifications extends React.Component<INotificationsPropert
                         </div>
                         <div className={styles.body}>
                             { data.map((d) => 
-                                <div className={styles.notificationItem}>
-                                    <span><i className={`ms-Icon ${iconHelper.convertTypetoIcon(d['type'])}`}></i></span>
-                                    <span>{d['title']}</span>
-                                    <span>{this.getFormattedDate(d['startDate'])}</span>
-                                </div>
+                                <Task
+                                    title={d['title']}
+                                    description={'Hello World'}
+                                    startTime={d['startDate']}
+                                    iconClass={d['type']}
+                                />
                             )}
                         </div>
                     </div> 

@@ -1,0 +1,40 @@
+$boxheight: 60px;
+.taskContainer {
+    background-color: #f6f6f6;
+    margin: 10px 0;
+    height: $boxheight;
+    width: 100%;
+    cursor: pointer;
+   
+    &:hover {
+        background-color: #c0c0c0;
+    }
+    .containerColumn {
+        box-sizing: border-box;
+        padding: 0 8px;
+        height: $boxheight;
+        &.media {
+            width: 15%;
+            float: left;
+            i {
+                font-size: 18px;
+            }
+        }
+        &.content {
+            width: 75%;
+            float: left;
+            .title {
+
+            }
+            .description {
+                
+            }
+        }
+        &.dismiss {
+            width: 10%;
+            float: left;
+        }
+    }
+
+
+}
