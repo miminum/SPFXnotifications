@@ -1,5 +1,4 @@
-import ITimsNotification from "../service/timsService";
-
+import TaskItem from "../model/Task";
 
 export default class DataHelper {
     
@@ -13,14 +12,14 @@ export default class DataHelper {
         return Promise.resolve(combinedData);
     }
 
-    private graphDataMapper(graphData): ITimsNotification[] {
+    private graphDataMapper(graphData): TaskItem[] {
         let newData = [];
         graphData.map((data) => {
             let newObj: {[k: string]: any} = {};
             newObj.title = data.subject;
             newObj.type = 'email';
             newObj.startDate = data.receivedDateTime;
-            newObj.endDate = data.receivedDateTime;
+            newObj.linkUrl = 'www.google.com.au';
             newData.push(newObj);
         });
         return newData;
