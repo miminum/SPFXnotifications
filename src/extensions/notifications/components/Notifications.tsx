@@ -4,6 +4,7 @@ import * as ReactDOM from "react-dom";
 import { Settings } from '@e2/settings';
 import Constants from "../../../common/Constants";
 /* tslint:disable-next-line:no-use-before-declare */
+import { Panel, PanelType } from 'office-ui-fabric-react/lib/Panel';
 import styles from "./Notifications.module.scss";
 import GraphService from "../service/graphService";
 import TimsService from "../service/timsService";
@@ -11,7 +12,6 @@ import DataHelper from "../util/dataHelper";
 import IconHelper from "../util/iconHelper";
 
 import * as Moment from "moment";
-import { Context } from "@microsoft/teams-js";
 import { BaseComponentContext } from '@microsoft/sp-component-base';
 
 export interface INotificationsProperties {
@@ -87,10 +87,13 @@ export default class Notifications extends React.Component<INotificationsPropert
     }
 
     private getFormattedDate(value:string) {
-        console.log('getFormattedDate() value', value);
-        var date = Moment(value);
-        console.log('getFormattedDate() date', date);
+        let date = Moment(value);
         return date.isValid() ? date.format('HH:MM, DD MMM YYYY') : '';
+    }
+
+    private hidePanel = (): void => {
+        console.log('hidePanel');
+        this.setState({ showContainer: false });
     }
 
     public render(): React.ReactElement<INotificationsProperties> {
@@ -106,24 +109,36 @@ export default class Notifications extends React.Component<INotificationsPropert
                         <i className="ms-Icon ms-Icon--Plug"></i>
                         <span className={styles.count}>{notificationCount}</span>
                 </div>
-                <div 
-                    className={styles.notificationsContainer}
-                    style={{display: !!showContainer ? 'block' : 'none'}}
-                >
-                    <div className={styles.header} onClick= { () => this.toggleNotificationsBox() }>
-                        {`${notificationCount} notifications`}
-                    </div>
-                    <div className={styles.body}>
-                        { data.map((d) => 
-                            <div className={styles.notificationItem}>
-                                <span><i className={`ms-Icon ${iconHelper.convertTypetoIcon(d['type'])}`}></i></span>
-                                <span>{d['title']}</span>
-                                <span>{this.getFormattedDate(d['startDate'])}</span>
-                            </div>
-                        )}
-                    </div>
-                </div>
+
+                <Panel 
+                    headerText={'Notifications'}
+                    isOpen={ showContainer }
+                    onDismiss={ () => this.hidePanel() }
+                    onLightDismissClick={ () => this.hidePanel() }
+                    isLightDismiss={true}
+                    isBlocking={false}
+                    // onRenderFooterContent={ this.renderFooter.bind(this) }
+                    isFooterAtBottom={true}>
+                    <div 
+                        className={styles.notificationsContainer}
+                        style={{display: !!showContainer ? 'block' : 'none'}}
+                    >
+                        <div className={styles.header} onClick= { () => this.toggleNotificationsBox() }>
+                            {`${notificationCount} notifications`}
+                        </div>
+                        <div className={styles.body}>
+                            { data.map((d) => 
+                                <div className={styles.notificationItem}>
+                                    <span><i className={`ms-Icon ${iconHelper.convertTypetoIcon(d['type'])}`}></i></span>
+                                    <span>{d['title']}</span>
+                                    <span>{this.getFormattedDate(d['startDate'])}</span>
+                                </div>
+                            )}
+                        </div>
+                    </div> 
+                </Panel>
             </div>
+
         );
     }
 }
