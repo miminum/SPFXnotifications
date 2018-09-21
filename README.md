@@ -21,4 +21,4 @@ In our pacakge-solution.json file, we need to add a key called "webApiPermission
 ]
 ```
 
-After we upload the package onto our sharepoint tenant, we need to approve the API permissions in our tenant by going to -> our tenants admin site -> 
+After we upload the package onto our sharepoint tenant, we need to approve the API permissions in our tenant by going to -> our tenants admin site -> Go to the "We're working on a new SharePoint admin center" Try Preview -> Advanced -> API Management and choose the resource/scope you included in the pacakge-solution file and approve it.
