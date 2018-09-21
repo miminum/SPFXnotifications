@@ -1,26 +1,24 @@
-## university-of-tasmania-notifications
+## University of Tasmania Notifications
 
-This is where you include your WebPart documentation.
+### Graph Api
+#### Permissions
+In order to access the MS Graph API we need to take certain steps to authenticate ourselves to be able to use a particular endpoint.
 
-### Building the code
+[List of different permissions required for different endpoints](https://developer.microsoft.com/en-us/graph/docs/concepts/permissions_reference)
 
-```bash
-git clone the repo
-npm i
-npm i -g gulp
-gulp
+In our pacakge-solution.json file, we need to add a key called "webApiPermissionRequests" and define the relavent permissions:
+
+```json
+"webApiPermissionRequests": [
+        {
+          "resource": "Microsoft Graph",
+          "scope": "User.Read.All"
+        },
+        {
+            "resource": "Microsoft Graph",
+            "scope": "Tasks.ReadWrite"
+        }
+]
 ```
 
-This package produces the following:
-
-* lib/* - intermediate-stage commonjs build artifacts
-* dist/* - the bundled script, along with other resources
-* deploy/* - all resources which should be uploaded to a CDN.
-
-### Build options
-
-gulp clean - TODO
-gulp test - TODO
-gulp serve - TODO
-gulp bundle - TODO
-gulp package-solution - TODO
+After we upload the package onto our sharepoint tenant, we need to approve the API permissions in our tenant by going to -> our tenants admin site -> 
