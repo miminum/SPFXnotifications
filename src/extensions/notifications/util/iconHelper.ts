@@ -1,6 +1,5 @@
 export default class IconHelper {
     public convertTypetoIcon(type:string): string {
-
         switch (type.toLowerCase()) {
             case "email": {
                 return "ms-Icon--Mail";

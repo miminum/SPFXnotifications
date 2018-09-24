@@ -11,6 +11,7 @@ import GraphService from "../service/graphService";
 import TimsService from "../service/timsService";
 import DataHelper from "../util/dataHelper";
 import IconHelper from "../util/iconHelper";
+import TaskItem from "../model/TaskItem";
 
 import * as Moment from "moment";
 import { BaseComponentContext } from '@microsoft/sp-component-base';
@@ -27,6 +28,7 @@ export interface INotificationsState {
     notificationCount: number;
     showContainer: boolean;
     data: Object[];
+    eventsData: Object[];
 }
 
 export default class Notifications extends React.Component<INotificationsProperties, INotificationsState> {
@@ -37,7 +39,8 @@ export default class Notifications extends React.Component<INotificationsPropert
             settingsLoaded: false,
             notificationCount: randomInteger,
             showContainer: false,
-            data: []
+            data: [],
+            eventsData: []
         };
     }
 
@@ -68,17 +71,18 @@ export default class Notifications extends React.Component<INotificationsPropert
         
         const GraphDataCall = graphService.mockDataPromise();
         const TimsDataCall = timsService.mockDataPromise();
-        Promise.all([GraphDataCall, TimsDataCall]).then(([GraphData, TimData]) => {
+        const EventsDataCall =  graphService.getEventsData();
+        Promise.all([GraphDataCall, TimsDataCall, EventsDataCall]).then(([GraphData, TimData, EventsData]) => {
             dataHelper.dataParser(GraphData, TimData).then((data) => {
-                console.log('2nd promise', data);
                 this.setState({
                     ...this.state,
-                    data: data
+                    data: data,
+                    eventsData: EventsData
                 });
             });
         });
 
-        graphService.getNotifications();
+        
         // Settings.Get([
         //     Constants.settings.apiURL
         // ]).then(settings => {
@@ -97,9 +101,13 @@ export default class Notifications extends React.Component<INotificationsPropert
         this.setState({ showContainer: false });
     }
 
+    private taskDismissed = (idToPass:string) => {
+        console.log('Notifications.tsx tasDismissed()', idToPass);
+    }
+
     public render(): React.ReactElement<INotificationsProperties> {
-        const { notificationCount, showContainer, data } = this.state;
-        const iconHelper = new IconHelper;
+        const { notificationCount, showContainer, data, eventsData } = this.state;
+        console.log('render() eventsData: ', eventsData);
         return (
             <div className={styles.main}>
                 <div 
@@ -112,7 +120,6 @@ export default class Notifications extends React.Component<INotificationsPropert
                 </div>
 
                 <Panel 
-                    headerText={'Notifications'}
                     isOpen={ showContainer }
                     onDismiss={ () => this.hidePanel() }
                     onLightDismissClick={ () => this.hidePanel() }
@@ -124,23 +131,41 @@ export default class Notifications extends React.Component<INotificationsPropert
                         className={styles.notificationsContainer}
                         style={{display: !!showContainer ? 'block' : 'none'}}
                     >
-                        <div className={styles.header} onClick= { () => this.toggleNotificationsBox() }>
+                        {/* <div className={styles.header} onClick= { () => this.toggleNotificationsBox() }>
                             {`${notificationCount} notifications`}
+                        </div> */}
+                        <div className={styles.header}>
+                            This Weeks Events:
+                        </div>
+                        <div className={styles.body}>
+                            { eventsData.map((d) => 
+                                <Task
+                                    title={d['title']}
+                                    description={d['description']}
+                                    startTime={d['startDate']}
+                                    endTime={d['endDate']}
+                                    iconClass={d['type']}
+                                    onDismiss={(id) => this.taskDismissed(id)}
+                                />
+                            )}
+                        </div>
+                        <div className={styles.header}>
+                            Upcoming Events
                         </div>
                         <div className={styles.body}>
                             { data.map((d) => 
                                 <Task
                                     title={d['title']}
-                                    description={'Hello World'}
+                                    description={{type: 'text', data: 'Hello World'}}
                                     startTime={d['startDate']}
                                     iconClass={d['type']}
+                                    onDismiss={(id) => this.taskDismissed(id)}
                                 />
                             )}
                         </div>
                     </div> 
                 </Panel>
             </div>
-
         );
     }
 }

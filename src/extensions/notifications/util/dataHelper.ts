@@ -24,4 +24,19 @@ export default class DataHelper {
         });
         return newData;
     }
+    
+    public mapEvents(eventsData): TaskItem[] {
+        let mappedData = [];
+        eventsData.map((eventData) => {
+            let mappedObject: {[k: string]: any} = {};
+            mappedObject.title = eventData.subject;
+            mappedObject.linkUrl = eventData.webLink;
+            mappedObject.startDate = eventData.start.dateTime;
+            mappedObject.type = 'event';
+            mappedObject.endDate = eventData.end.dateTime;
+            mappedObject.description = { type: 'location', data: eventData.location.displayName };
+            mappedData.push(mappedObject);
+        });
+        return mappedData;
+    } 
 }

@@ -5,13 +5,16 @@ import * as Moment from "moment";
 import IconHelper from "../util/iconHelper";
 
 export interface ITaskProperties {
-    onDismiss?: OnCallbackEvent;
+    // Need to find correct type (OnCallBackOption) for onDismiss
+    onDismiss: Function;
     title: string;
-    description: string;
+    description: Object;
     startTime: Date;
+    endTime?: Date;
     photoUrl?: string;
     iconClass?: string;
     linkUrl?: string;
+    id?: string;
 }
 
 export interface ITaskState {
@@ -23,14 +26,44 @@ export default class Task extends React.Component<ITaskProperties, ITaskState> {
         super(props);
     }
 
-    private getFormattedDate(value:string) {
-        let date = Moment(value);
-        return date.isValid() ? date.format('HH:MM, DD MMM YYYY') : '';
+    private getFormattedDate(startTime:Date, endTime?:Date): string {
+        let start = Moment(startTime);
+        const formattedStart = start.isValid() ? start.format('DD/MM, h:mma') : '';
+        if (endTime) {
+            let end = Moment(endTime);
+            //To do: account for end dates which are on different days
+            const formattedEnd = end.isValid ? end.format('h:mma') : '';
+            return formattedStart + ' - '+ formattedEnd;
+        }
+        return formattedStart;
     }
 
+    private descriptionBuilder(description:object): JSX.Element {
+        console.log('descriptionBuilder()', description);
+        switch(description['type']) {
+            case 'text':
+                return <span>{description['data']}</span>;
+            case 'location':
+            //ToDo: update to appropriate Icon
+                return <span><i className="ms-Icon ms-Icon--CollapseMenu" aria-hidden="true"></i>{description['data']}</span>;
+            default:
+                return <span></span>;
+        }
+    }
+    
+    private taskDismissed = () => {
+        const {onDismiss, id} = this.props;
+        const idToPass = id || 'testId';
+        onDismiss(idToPass);
+    }
 
     public render(): React.ReactElement<ITaskProperties> {
         const iconHelper = new IconHelper;
+
+        const date = this.getFormattedDate(this.props.startTime, this.props.endTime);
+        const descriptionElement = this.descriptionBuilder(this.props.description);
+        console.log('render()', this.props.description)
+
         return (
             <div className={styles.taskContainer}>
                 <div className={styles.media + ' ' + styles.containerColumn}>
@@ -38,9 +71,12 @@ export default class Task extends React.Component<ITaskProperties, ITaskState> {
                 </div>
                 <div className={styles.content + ' ' + styles.containerColumn}>
                     <div>{this.props.title}</div>
-                    <div>{this.props.description}</div>
+                    <div>{descriptionElement}</div>
+                    <div className={styles.time}>{date}</div> 
                 </div>
                 <div className={styles.dismiss + ' ' + styles.containerColumn}>
+                    <i className='ms-Icon ms-Icon--Delete' onClick={() => this.taskDismissed()}>
+                    </i>
                 </div>
             </div>
         );

@@ -1,13 +1,18 @@
-$boxheight: 60px;
+$boxheight: 70px;
+$iconSize: 18px;
 .taskContainer {
     background-color: #f6f6f6;
     margin: 10px 0;
     height: $boxheight;
     width: 100%;
     cursor: pointer;
+    padding: 5px 0;
    
     &:hover {
         background-color: #c0c0c0;
+        i {
+            color: #e12422;
+        }
     }
     .containerColumn {
         box-sizing: border-box;
@@ -16,23 +21,36 @@ $boxheight: 60px;
         &.media {
             width: 15%;
             float: left;
+            text-align: center;
             i {
-                font-size: 18px;
+                position: relative;
+                top: 50%;
+                transform: translateY(-50%);
+                font-size: $iconSize;
             }
         }
         &.content {
             width: 75%;
             float: left;
             .title {
-
+                font-weight: bold;
+                color: #1c1c1c  ;
             }
             .description {
-                
+                color: #252525;
+            }
+            .time {
+                font-style: italic;
+                color: #252525;
             }
         }
         &.dismiss {
             width: 10%;
             float: left;
+            padding: 0!important;
+            i {
+                font-size: $iconSize
+            }
         }
     }
 

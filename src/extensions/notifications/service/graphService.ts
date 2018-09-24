@@ -3,6 +3,11 @@ import axios from "axios";
 import { MSGraphClient } from '@microsoft/sp-http';
 import { Context } from '@microsoft/teams-js';
 import { BaseComponentContext } from '@microsoft/sp-component-base';
+import TaskItem from "../model/TaskItem";
+import DataHelper from "../util/dataHelper";
+
+import * as Moment from "moment";
+import { resolve } from '../../../../node_modules/@types/q';
 
 export default class GraphService {
     private context: BaseComponentContext;
@@ -602,19 +607,60 @@ export default class GraphService {
         return Promise.resolve(MockData);
     }
 
-    public getNotifications() {
+    public getPlannerData() {
         return this.context.msGraphClientFactory
             .getClient()
             .then((client: MSGraphClient): void => {
                 // get information about the current user from the Microsoft Graph
                 client
-                .api("me/events?$filter=startswith(subject, 't')")
+                .api('/me/planner/tasks')
                 .get((error, response: any, rawResponse?: any) => {
-                        console.log('getNotifications error', error);
-                        console.log('getNotifications response', response);
-                        console.log('getNotifications rawResponse', rawResponse);
+                    console.log('getNotifications error', error);
+                    console.log('getNotifications response', response);
+                    console.log('getNotifications rawResponse', rawResponse);
                     return Promise.resolve(null);
+                    
+                });
             });
-        });
     }
+
+    public getEventsData(): Promise<TaskItem[]> {
+        let returnPromise = new Promise<TaskItem[]>((resolveEventsData, reject) => {
+
+            const dataHelper = new DataHelper; 
+            const today = Moment().toISOString();
+            const todayPlusSeven = Moment().add(7, 'days').toISOString();  
+            const apiString = '/me/calendarview?startdatetime=' + today + '&enddatetime=' + todayPlusSeven;
+            // /me/calendarview?startdatetime=2018-09-24T01:20:46.874Z&enddatetime=2018-10-01T01:20:46.874Z
+            this.context.msGraphClientFactory
+                .getClient()
+                .then((client: MSGraphClient) => {
+                    // get information about the current user from the Microsoft Graph
+                    client 
+                    .api(apiString)
+                    .get((error, response: any, rawResponse?: any) => {
+                        if (error) {
+                            // Todo: Differentiate Errors with Logger
+                            reject(error);
+                        }
+                        else if (!!response) {
+                            console.log('getEventsData() response', response);
+                            let parsedValues = dataHelper.mapEvents(response.value);
+                            console.log('getEventsData() parsedValues', parsedValues);
+                            resolveEventsData(parsedValues);
+                        }
+                        else { resolveEventsData([]); }
+                    }); 
+                }).catch(error => {
+                    // Todo: Differentiate Errors with Logger
+                    reject(error);
+                });
+            //console.log('getEventsData() before return', graphData);
+            //return Promise.resolve(await graphData);
+
+        });
+
+        return returnPromise;
+    }
+
 }
