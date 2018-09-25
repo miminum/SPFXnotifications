@@ -607,6 +607,39 @@ export default class GraphService {
         return Promise.resolve(MockData);
     }
 
+    public getOutlookTasks(isBeta:boolean) {
+        let TaskPromise = new Promise<TaskItem[]>((resolveTasksData, reject) => {
+            const config = isBeta ? {defaultVersion: 'beta'} : {};
+            const dataHelper = new DataHelper; 
+            this.context.msGraphClientFactory
+                .getClient()
+                .then((client: MSGraphClient): void => {
+                    // get information about the current user from the Microsoft Graph
+                    client
+                    .api('/me/outlook/tasks', config)
+                    .get((error, response: any, rawResponse?: any) => {
+                        console.log('getOutlookTasks() response outside:', response);
+                        if (!!error) {
+                            // Todo: Differentiate Errors with Logger
+                            reject(error);
+                        }
+                        else if (!!response) {
+                            console.log('getOutlookTasks() response:', response);
+                            let parsedValues = dataHelper.mapOutlookTasks(response.value);
+                            console.log('getOutlookTasks() parsedValues:', parsedValues);
+                            resolveTasksData(parsedValues);
+                        }
+                        else { resolveTasksData([]); }
+                        
+                    });
+                }).catch(error => {
+                    // Todo: Differentiate Errors with Logger
+                    reject(error);
+                });
+        });
+        return TaskPromise;
+    }
+
     public getPlannerData() {
         return this.context.msGraphClientFactory
             .getClient()
@@ -618,6 +651,7 @@ export default class GraphService {
                     console.log('getNotifications error', error);
                     console.log('getNotifications response', response);
                     console.log('getNotifications rawResponse', rawResponse);
+
                     return Promise.resolve(null);
                     
                 });
@@ -644,9 +678,7 @@ export default class GraphService {
                             reject(error);
                         }
                         else if (!!response) {
-                            console.log('getEventsData() response', response);
                             let parsedValues = dataHelper.mapEvents(response.value);
-                            console.log('getEventsData() parsedValues', parsedValues);
                             resolveEventsData(parsedValues);
                         }
                         else { resolveEventsData([]); }
@@ -655,11 +687,7 @@ export default class GraphService {
                     // Todo: Differentiate Errors with Logger
                     reject(error);
                 });
-            //console.log('getEventsData() before return', graphData);
-            //return Promise.resolve(await graphData);
-
         });
-
         return returnPromise;
     }
 

@@ -1,18 +1,24 @@
 $boxheight: 70px;
-$iconSize: 18px;
+$iconSize: 1.3em;
+$containerLineHeight: 1.3em;
+@function calc-multiply($multiplier, $height) {
+    @return $multiplier * $height;
+}
+
 .taskContainer {
     background-color: #f6f6f6;
-    margin: 10px 0;
+    margin: 5px 0;
     height: $boxheight;
     width: 100%;
     cursor: pointer;
-    padding: 5px 0;
+    padding: 10px 0;
    
     &:hover {
         background-color: #c0c0c0;
         i {
             color: #e12422;
         }
+
     }
     .containerColumn {
         box-sizing: border-box;
@@ -32,27 +38,44 @@ $iconSize: 18px;
         &.content {
             width: 75%;
             float: left;
-            .title {
-                font-weight: bold;
-                color: #1c1c1c  ;
+            div{
+                overflow: hidden;
+                text-overflow: ellipsis;
+                line-height: $containerLineHeight;
             }
-            .description {
-                color: #252525;
+            .titleAndDescription {
+                height: calc-multiply(3, $containerLineHeight);
+                .title {
+                    font-weight: 600;
+                    color: #1c1c1c;
+                    line-height: $containerLineHeight;
+                    max-height: calc-multiply(2, $containerLineHeight);
+                }
+                .description {
+                    color: #252525;
+                    line-height: $containerLineHeight;
+                    max-height: calc-multiply(2, $containerLineHeight);
+                    i {
+                        font-size: $iconSize;
+                    }
+                }
             }
             .time {
-                font-style: italic;
                 color: #252525;
             }
         }
         &.dismiss {
             width: 10%;
             float: left;
-            padding: 0!important;
+            padding: 1px 0 0!important;
             i {
-                font-size: $iconSize
+                font-size: calc-multiply(0.7, $iconSize);
             }
         }
     }
 
 
 }
+
+
+  

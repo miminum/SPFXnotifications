@@ -29,90 +29,76 @@ export interface INotificationsState {
     showContainer: boolean;
     data: Object[];
     eventsData: Object[];
+    tasksData: Object[];
+    animateButton: boolean;
 }
 
 export default class Notifications extends React.Component<INotificationsProperties, INotificationsState> {
     constructor(props: INotificationsProperties) {
         super(props);
-        const randomInteger = Math.floor(Math.random() * 11);
         this.state = {
             settingsLoaded: false,
-            notificationCount: randomInteger,
+            notificationCount: 0,
             showContainer: false,
             data: [],
-            eventsData: []
+            eventsData: [],
+            tasksData:[],
+            animateButton: false
         };
     }
 
-    private toggleNotificationsBox(): void {
+    private togglePanel(): void {
         this.setState({
             ...this.state,
             showContainer: !this.state.showContainer
         });
-    } 
+    }
+    
+    private hidePanel = (): void => {
+        this.setState({ showContainer: false });
+    }
 
     public componentDidMount() {
         // window.addEventListener('click', this.hideNotifications.bind(this));
-        this.initComponent();
+        this.load();
     }
 
-    private hideNotifications = () => {
-         this.setState({
-            ...this.state,
-            showContainer: false
-        });
-    }
-
-    private initComponent() {
-        console.log('initComponent()');
+    private load() {
         const graphService = new GraphService(this.props.context);
         const timsService = new TimsService;
         const dataHelper = new DataHelper; 
         
-        const GraphDataCall = graphService.mockDataPromise();
+        // const GraphDataCall = graphService.mockDataPromise();
         const TimsDataCall = timsService.mockDataPromise();
         const EventsDataCall =  graphService.getEventsData();
-        Promise.all([GraphDataCall, TimsDataCall, EventsDataCall]).then(([GraphData, TimData, EventsData]) => {
-            dataHelper.dataParser(GraphData, TimData).then((data) => {
-                this.setState({
-                    ...this.state,
-                    data: data,
-                    eventsData: EventsData
-                });
+        const TasksDataCall = graphService.getOutlookTasks(true);
+        Promise.all([TimsDataCall, EventsDataCall, TasksDataCall]).then(([TimData, EventsData, TasksData]) => {
+            const count = EventsData.length + TasksData.length + TimData.length;
+            this.setState({
+                ...this.state,
+                data: TimData,
+                eventsData: EventsData,
+                tasksData: TasksData,
+                notificationCount: count
             });
+    
         });
-
-        
-        // Settings.Get([
-        //     Constants.settings.apiURL
-        // ]).then(settings => {
-        //     stateToUpdate.settingsLoaded = true;
-        //     this.setState(stateToUpdate);
-        // });
     }
 
-    private getFormattedDate(value:string) {
-        let date = Moment(value);
-        return date.isValid() ? date.format('HH:MM, DD MMM YYYY') : '';
-    }
 
-    private hidePanel = (): void => {
-        console.log('hidePanel');
-        this.setState({ showContainer: false });
-    }
 
     private taskDismissed = (idToPass:string) => {
         console.log('Notifications.tsx tasDismissed()', idToPass);
     }
 
     public render(): React.ReactElement<INotificationsProperties> {
-        const { notificationCount, showContainer, data, eventsData } = this.state;
-        console.log('render() eventsData: ', eventsData);
+        const { notificationCount, showContainer, data, eventsData, tasksData } = this.state;
+        const animateClass = this.state.animateButton ? (' ' + styles["pulsate-fwd"]) : '';
         return (
             <div className={styles.main}>
                 <div 
-                    className={styles.iconContainer}
-                    onClick= { () => this.toggleNotificationsBox() }
+                    className={styles.iconContainer + animateClass}
+                    onClick= { () => this.togglePanel() }
                     style={{backgroundColor: showContainer && '#e12422'}}
                     >
                         <i className="ms-Icon ms-Icon--Plug"></i>
@@ -121,6 +107,7 @@ export default class Notifications extends React.Component<INotificationsPropert
 
                 <Panel 
                     isOpen={ showContainer }
+                    // className= { styles.panelStyling }
                     onDismiss={ () => this.hidePanel() }
                     onLightDismissClick={ () => this.hidePanel() }
                     isLightDismiss={true}
@@ -129,13 +116,12 @@ export default class Notifications extends React.Component<INotificationsPropert
                     isFooterAtBottom={true}>
                     <div 
                         className={styles.notificationsContainer}
-                        style={{display: !!showContainer ? 'block' : 'none'}}
                     >
-                        {/* <div className={styles.header} onClick= { () => this.toggleNotificationsBox() }>
+                        {/* <div className={styles.header} onClick= { () => this.togglePanel() }>
                             {`${notificationCount} notifications`}
                         </div> */}
                         <div className={styles.header}>
-                            This Weeks Events:
+                            <i className={'ms-Icon ms-Icon--Calendar'} aria-hidden="true"></i> This Weeks Events:
                         </div>
                         <div className={styles.body}>
                             { eventsData.map((d) => 
@@ -150,7 +136,22 @@ export default class Notifications extends React.Component<INotificationsPropert
                             )}
                         </div>
                         <div className={styles.header}>
-                            Upcoming Events
+                            <i className={'ms-Icon ms-Icon--Taskboard'} aria-hidden="true"></i> My Tasks:
+                        </div>
+                        <div className={styles.body}>
+                            { tasksData.map((d) => 
+                                <Task
+                                    title={d['title']}
+                                    description={d['description']}
+                                    startTime={d['startDate']}
+                                    endTime={d['endDate']}
+                                    iconClass={d['type']}
+                                    onDismiss={(id) => this.taskDismissed(id)}
+                                />
+                            )}
+                        </div>
+                        <div className={styles.header}>
+                            <i className={'ms-Icon ms-Icon--People'} aria-hidden="true"></i> Tasks (from Utas API)
                         </div>
                         <div className={styles.body}>
                             { data.map((d) => 

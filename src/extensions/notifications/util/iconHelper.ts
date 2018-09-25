@@ -16,6 +16,9 @@ export default class IconHelper {
             case "social": {
                 return "ms-Icon--People";
             }
+            case "task": {
+                return "ms-Icon--TaskLogo";
+            }
         }
     }
 }

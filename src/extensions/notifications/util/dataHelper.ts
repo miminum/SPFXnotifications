@@ -39,4 +39,32 @@ export default class DataHelper {
         });
         return mappedData;
     } 
+
+    public mapOutlookTasks(tasksData): TaskItem[] {
+        console.log('mapOutlookTasks initiation');
+        let mappedData = [];
+        tasksData.map((taskData) => {
+            let mappedObject: {[k: string]: any} = {};
+            mappedObject.title = taskData.subject;
+            mappedObject.description = { type: 'text', data: this.stripHtml(taskData.body.content) };
+            mappedObject.type = "task";
+            mappedObject.startDate = null;
+            mappedObject.endDate = taskData.dueDateTime.dateTime;
+            mappedData.push(mappedObject);
+        });
+        console.log('mapOutlookTasks mappedData', mappedData);
+        return mappedData;
+    }
+
+    private stripHtml(html):string {
+        // Removes Comments & LineBreaks
+        html = html.replace(/<!--[\s\S]*?-->|\r|\n/g, '');
+        // Create a new div element
+        let temporalDivElement = document.createElement("div");
+        // Set the HTML content with the providen
+        temporalDivElement.innerHTML = html;
+        // temporalDivElement.removeAttribute("style");
+        // Retrieve the text property of the element (cross-browser support)
+        return temporalDivElement.textContent || temporalDivElement.innerText || "";
+    }
 }
