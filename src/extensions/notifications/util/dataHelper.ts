@@ -8,7 +8,6 @@ export default class DataHelper {
         // combinedData.sort((a,b) => 
 
         // );
-        console.log('dataParser:', combinedData); 
         return Promise.resolve(combinedData);
     }
 
@@ -41,7 +40,6 @@ export default class DataHelper {
     } 
 
     public mapOutlookTasks(tasksData): TaskItem[] {
-        console.log('mapOutlookTasks initiation');
         let mappedData = [];
         tasksData.map((taskData) => {
             let mappedObject: {[k: string]: any} = {};
@@ -52,7 +50,6 @@ export default class DataHelper {
             mappedObject.endDate = taskData.dueDateTime.dateTime;
             mappedData.push(mappedObject);
         });
-        console.log('mapOutlookTasks mappedData', mappedData);
         return mappedData;
     }
 
@@ -63,7 +60,6 @@ export default class DataHelper {
         let temporalDivElement = document.createElement("div");
         // Set the HTML content with the providen
         temporalDivElement.innerHTML = html;
-        // temporalDivElement.removeAttribute("style");
         // Retrieve the text property of the element (cross-browser support)
         return temporalDivElement.textContent || temporalDivElement.innerText || "";
     }
