@@ -34,6 +34,8 @@ export interface INotificationsState {
 }
 
 export default class Notifications extends React.Component<INotificationsProperties, INotificationsState> {
+    private interval: any;
+
     constructor(props: INotificationsProperties) {
         super(props);
         this.state = {
@@ -50,29 +52,49 @@ export default class Notifications extends React.Component<INotificationsPropert
     private togglePanel(): void {
         this.setState({
             ...this.state,
-            showContainer: !this.state.showContainer
+            showContainer: !this.state.showContainer,
+            animateButton: false
         });
     }
     
     private hidePanel = (): void => {
-        this.setState({ showContainer: false });
+        this.setState({ 
+            ...this.state,
+            showContainer: false, 
+            animateButton: false 
+        });
     }
 
     public componentDidMount() {
-        // window.addEventListener('click', this.hideNotifications.bind(this));
         this.load();
+        // window.addEventListener('click', this.hideNotifications.bind(this));
+        this.interval = setInterval(() => this.load(true), 10000); 
     }
 
-    private load() {
+    public componentWillUnmount() {
+        clearInterval(this.interval);
+    }
+
+    private load(reload?: boolean) {
         const graphService = new GraphService(this.props.context);
         const timsService = new TimsService;
-        const dataHelper = new DataHelper; 
-        
-        // const GraphDataCall = graphService.mockDataPromise();
+
         const TimsDataCall = timsService.mockDataPromise();
         const EventsDataCall =  graphService.getEventsData();
         const TasksDataCall = graphService.getOutlookTasks(true);
+
         Promise.all([TimsDataCall, EventsDataCall, TasksDataCall]).then(([TimData, EventsData, TasksData]) => {
+            if (reload) {
+                // Todo: better method to only account for new tasks coming through. Limitation of current if statement is that it would animate if a task is deleted
+                if (TimData.toString() != this.state.data.toString() || EventsData.toString() != this.state.eventsData.toString() || TasksData.toString() != this.state.tasksData.toString()) {
+                    this.setState({
+                        ...this.state,
+                        animateButton: true
+                    });
+                }
+                else return;
+            }
+            console.log('in here');
             const count = EventsData.length + TasksData.length + TimData.length;
             this.setState({
                 ...this.state,
@@ -81,11 +103,9 @@ export default class Notifications extends React.Component<INotificationsPropert
                 tasksData: TasksData,
                 notificationCount: count
             });
-    
+            
         });
     }
-
-
 
     private taskDismissed = (idToPass:string) => {
         console.log('Notifications.tsx tasDismissed()', idToPass);
@@ -93,6 +113,7 @@ export default class Notifications extends React.Component<INotificationsPropert
 
     public render(): React.ReactElement<INotificationsProperties> {
         const { notificationCount, showContainer, data, eventsData, tasksData } = this.state;
+        console.log('render() animate:', this.state.animateButton);
         const animateClass = this.state.animateButton ? (' ' + styles["pulsate-fwd"]) : '';
         return (
             <div className={styles.main}>
